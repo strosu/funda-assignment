@@ -5,46 +5,35 @@ namespace Funda.Crawler.Services
 {
     public class RequestService<T> : IRequestService<T>
     {
-        // 10 reties with backoff should be enough
         private static readonly int MaxRetryCount = 10;
 
         private readonly HttpClient _httpClient;
+        private readonly IWaitingService _waitingService;
 
-        public RequestService(HttpClient httpClient)
+        public RequestService(HttpClient httpClient, IWaitingService waitingService)
         {
             _httpClient = httpClient;
+            _waitingService = waitingService;
         }
 
         public async Task<T> GetPageResult(string pageUrl)
         {
-            var retryCount = 1;
-            var waitSeconds = 1;
+            _waitingService.Reset();
 
-            while (retryCount < MaxRetryCount)
+            while (_waitingService.CanRetryFurther())
             {
-                try
-                {
-                    var result = await _httpClient.GetAsync(pageUrl);
+                var result = await _httpClient.GetAsync(pageUrl);
 
-                    if (result != null && result.IsSuccessStatusCode)
-                    {
-                        var json = await result.Content.ReadAsStringAsync();
-                        return JsonConvert.DeserializeObject<T>(json);
-                    }
-                }
-                catch (Exception ex)
+                if (result != null && result.IsSuccessStatusCode)
                 {
-                    Console.WriteLine(ex.Message);
+                    var json = await result.Content.ReadAsStringAsync();
+                    return JsonConvert.DeserializeObject<T>(json);
                 }
 
-                retryCount++;
-                Console.WriteLine($"Waiting {waitSeconds * 1000}");
-
-                await Task.Delay(waitSeconds * 1000);
-                waitSeconds *= 2;
+                await _waitingService.Wait();
             }
 
-            throw new TimeoutException("Could not get the request in time");
+            throw new TimeoutException("Could not get the request in time, giving up.");
         }
     }
 

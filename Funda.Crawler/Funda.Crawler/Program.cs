@@ -21,9 +21,9 @@ class Program
         var listings = crawler.GetListings("http://partnerapi.funda.nl/feeds/Aanbod.svc/json/ac1b0b1572524640a0ecc54de453ea9f/?type=koop&zo=/amsterdam&page={0}&pagesize=25")
             .GetAwaiter().GetResult();
 
-        var mostListings = listings.GroupBy(x => (x.MakelaarId, x.MakelaarNaam)).Select(x => new
+        var mostListings = listings.GroupBy(x => (x.SellerId, x.SellerName)).Select(x => new
         {
-            AgentName = x.Key.MakelaarNaam,
+            AgentName = x.Key.SellerName,
             ListingCount = x.Count()
         }
         ).ToList().OrderByDescending(x => x.ListingCount).Take(10);
@@ -43,8 +43,8 @@ class Program
     private static void ConfigureServices(IServiceCollection services)
     {
         services.AddSingleton<HttpClient>();
-        services
-            .AddSingleton<IRequestService<ResultList>, RequestService<ResultList>>();
+        services.AddTransient<IRequestService<ResultList>, RequestService<ResultList>>();
+        services.AddTransient<IWaitingService, ExponentialBackoffWaitingService>();
     }
 }
 

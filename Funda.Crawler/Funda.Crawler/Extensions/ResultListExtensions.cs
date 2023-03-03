@@ -7,7 +7,7 @@ namespace Funda.Crawler.Extensions
     {
         public static bool IsLastPage(this ResultList result)
         {
-            return string.IsNullOrEmpty(result?.Paging?.VolgendeUrl);
+            return string.IsNullOrEmpty(result?.Paging?.NextPageUrl);
         }
     }
 }

@@ -19,19 +19,44 @@ namespace Funda.Crawler
         {
             var result = new HashSet<Listing>();
 
-            ResultList currentResultPage = null;
-            var currentPageIndex = 1;
-            do
+            var firstPage = await GetPageResults(urlTemplate, 1);
+            var pageInfo = firstPage.Paging;
+
+            if (firstPage.IsLastPage())
             {
-                currentResultPage = await GetPageResults(urlTemplate, currentPageIndex);
-                foreach (var listing in currentResultPage?.Objects)
+                return firstPage.Listings;
+            }
+
+            var taskList = new List<Task<ResultList>>();
+            for (var i = 2; i < pageInfo.TotalpageNumber; i++)
+            {
+                taskList.Add(GetPageResults(urlTemplate, i));
+            }
+
+            await Task.WhenAll(taskList);
+
+            foreach (var task in taskList)
+            {
+                var currentPage = task.Result.Listings;
+                foreach (var listing in currentPage)
                 {
                     result.Add(listing);
                 }
-
-                currentPageIndex++;
             }
-            while (!currentResultPage.IsLastPage());
+
+            //ResultList currentResultPage = null;
+            //var currentPageIndex = 1;
+            //do
+            //{
+            //    currentResultPage = await GetPageResults(urlTemplate, currentPageIndex);
+            //    foreach (var listing in currentResultPage?.Objects)
+            //    {
+            //        result.Add(listing);
+            //    }
+
+            //    currentPageIndex++;
+            //}
+            //while (!currentResultPage.IsLastPage());
 
 
             // Load the first page again to see if anything else was added
@@ -43,7 +68,11 @@ namespace Funda.Crawler
         {
             Console.WriteLine($"Processing page {pageIndex}");
 
-            return await _requestService.GetPageResult(string.Format(urlTemplate, pageIndex));
+            var result = await _requestService.GetPageResult(string.Format(urlTemplate, pageIndex));
+
+            Console.WriteLine($"Finished getting page {pageIndex}");
+
+            return result;
         }
     }
 }

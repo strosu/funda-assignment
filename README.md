@@ -6,6 +6,7 @@ Contents
 ========
 
  * [Problem](#problem)
+ * [Assumptions](#assumptions)
  * [Structure](#structure)
  * [Observations](#observations)
  * [General approach](#general-approach)
@@ -21,6 +22,15 @@ Relevant information:
 - might get throttled by the backend if doing more than 100 requests per minute (doesn't always happen, seems like a soft-ish limit).
 
 Processing the information in the required format is trivial once we have all the data (i.e. grouping by the posting agency and sorting).
+
+
+### Assumptions
+---
+
+- The implementation should balance execution speed (a business constraint normally) with code simplicity
+
+- Based on the kind of data (real estate listings), we are assuming the data itself will not vary greatly over the course of the execution. That is, if the initial request sais there are 120 pages of results, there won't be significantly more (or less) before we finish executing (e.g. within the next minute or 2). 
+
 
 ### Structure
 ---
