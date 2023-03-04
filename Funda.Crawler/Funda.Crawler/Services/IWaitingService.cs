@@ -1,6 +1,11 @@
 ﻿using System;
 namespace Funda.Crawler.Services
 {
+    /// <summary>
+    /// Service used as a strategy for waiting between failed requests
+    /// Implements an exponential backoff; this works well when there's an outage, might not be the best for when throttled
+    /// As the sliding window is 60s and we exhaust it pretty early in the execution, we need to get to the 32-64s interval, at which point the waiting times between requests are rather large
+    /// </summary>
     public class ExponentialBackoffWaitingService : IWaitingService
     {
         private static readonly int BackoffFactor = 2;

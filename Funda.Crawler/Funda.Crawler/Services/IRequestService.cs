@@ -18,6 +18,8 @@ namespace Funda.Crawler.Services
 
         public async Task<T> GetPageResult(string pageUrl)
         {
+            Console.WriteLine($"Processing page {pageUrl}");
+
             _waitingService.Reset();
 
             while (_waitingService.CanRetryFurther())
@@ -27,6 +29,9 @@ namespace Funda.Crawler.Services
                 if (result != null && result.IsSuccessStatusCode)
                 {
                     var json = await result.Content.ReadAsStringAsync();
+
+                    Console.WriteLine($"Finished getting page {pageUrl}");
+
                     return JsonConvert.DeserializeObject<T>(json);
                 }
 

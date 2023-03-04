@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using Funda.Crawler.Extensions;
 using Funda.Crawler.Models;
 using Funda.Crawler.Services;
@@ -6,7 +7,12 @@ using Newtonsoft.Json;
 
 namespace Funda.Crawler
 {
-    public class Crawler
+    public interface ICrawler
+    {
+        Task<IEnumerable<Listing>> GetListingsAsync(string urlTemplate);
+    }
+
+    public class Crawler : ICrawler
     {
         private readonly IRequestService<ResultList> _requestService;
 
@@ -15,13 +21,18 @@ namespace Funda.Crawler
             _requestService = requestService;
         }
 
-        public async Task<IEnumerable<Listing>> GetListings(string urlTemplate)
+        /// <summary>
+        /// Takes a URL template and retries all the listings
+        /// This implementation does not consume the NextPageUrl, instead it fills in the page number
+        /// </summary>
+        /// <param name="urlTemplate"></param>
+        /// <returns></returns>
+        public async Task<IEnumerable<Listing>> GetListingsAsync(string urlTemplate)
         {
-            var result = new HashSet<Listing>();
-
             var firstPage = await GetPageResults(urlTemplate, 1);
             var pageInfo = firstPage.Paging;
 
+            // If we're dealing with just 1 page, we're done here
             if (firstPage.IsLastPage())
             {
                 return firstPage.Listings;
@@ -35,44 +46,30 @@ namespace Funda.Crawler
 
             await Task.WhenAll(taskList);
 
-            foreach (var task in taskList)
+            // TODO - Load the first page again to see if anything else was added
+            // This would be essential if the list of listings would be likely to change during the execution
+
+            return GetUniqueListings(taskList.Select(x => x.Result));
+        }
+
+        private IEnumerable<Listing> GetUniqueListings(IEnumerable<ResultList> listings)
+        {
+            var result = new HashSet<Listing>();
+            foreach (var page in listings)
             {
-                var currentPage = task.Result.Listings;
+                var currentPage = page.Listings;
                 foreach (var listing in currentPage)
                 {
                     result.Add(listing);
                 }
             }
 
-            //ResultList currentResultPage = null;
-            //var currentPageIndex = 1;
-            //do
-            //{
-            //    currentResultPage = await GetPageResults(urlTemplate, currentPageIndex);
-            //    foreach (var listing in currentResultPage?.Objects)
-            //    {
-            //        result.Add(listing);
-            //    }
-
-            //    currentPageIndex++;
-            //}
-            //while (!currentResultPage.IsLastPage());
-
-
-            // Load the first page again to see if anything else was added
-
             return result;
         }
 
         private async Task<ResultList> GetPageResults(string urlTemplate, int pageIndex)
         {
-            Console.WriteLine($"Processing page {pageIndex}");
-
-            var result = await _requestService.GetPageResult(string.Format(urlTemplate, pageIndex));
-
-            Console.WriteLine($"Finished getting page {pageIndex}");
-
-            return result;
+            return await _requestService.GetPageResult(string.Format(urlTemplate, pageIndex));
         }
     }
 }
