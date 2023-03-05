@@ -5,6 +5,8 @@ VisualStudioVersion = 25.0.1706.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Funda.Crawler", "Funda.Crawler\Funda.Crawler.csproj", "{13382972-EE1C-46F1-AABF-1E8AAC575F77}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Funda.Crawler.Tests", "Funda.Crawler.Tests\Funda.Crawler.Tests.csproj", "{5CDE3B90-1C59-4F5E-8096-5D458D05102B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{13382972-EE1C-46F1-AABF-1E8AAC575F77}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{13382972-EE1C-46F1-AABF-1E8AAC575F77}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{13382972-EE1C-46F1-AABF-1E8AAC575F77}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5CDE3B90-1C59-4F5E-8096-5D458D05102B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5CDE3B90-1C59-4F5E-8096-5D458D05102B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5CDE3B90-1C59-4F5E-8096-5D458D05102B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5CDE3B90-1C59-4F5E-8096-5D458D05102B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
