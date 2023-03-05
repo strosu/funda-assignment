@@ -10,6 +10,7 @@ Contents
  * [Structure](#structure)
  * [Observations](#observations)
  * [General approach](#general-approach)
+ * [Abstractions](#abstractions)
 
 ### Problem
 ---
@@ -78,9 +79,9 @@ If the requests would be throttled after 100 with a 60s cooling period, most of 
 
 Using 5 as the degree of parallelism:
 
-*Rough execution tiem**: 
+*Rough execution time*: 
 - 5s when not getting throttled, significantly faster than the serial algorithm. Roughly 200ms per request, similar to the initial approach.
-- 75s when throttled: the patter is similar to the serial approach - we burst through our available quota faster, but still need to wait. As the number of pages is just slightly higher than the throttling limitl, the remainder are done faster, but it has a small impact on the overall time.
+- 75s when throttled: the pattern is similar to the serial approach - we burst through our available quota faster, but still need to wait. As the number of pages is just slightly higher than the throttling limitl, the remainder are done faster, but it has a small impact on the overall time.
 
 **Pros**
 
@@ -91,4 +92,26 @@ Using 5 as the degree of parallelism:
 - needs an additional layer to distribute the work and aggredate the results
 
 
+### Abstractions
 
+These should be self evident from the code itself, but adding them here to speed up the process:
+
+- Program.cs - does the wiring for the DI container and executes the agent twice, one for each of the URLs we are crawling
+- AgentFinder.cs
+	- connects the different services together
+	- gets the results (while timing the operation), and lets the formatter display them
+- CrawlerScheduler.cs
+	- determines the number of total pages to be queried
+	- creates a variable numeber of crawlers, based on the degree of parallelism configured
+	- distributes the urls evenly between the crawlers
+	- aggregates the results
+- Crawler.cs
+	- takes a list of URLs and queries them sequentially
+	- returns a list of unique listings
+- RequestService.cs
+	- handles the http call aspects and interpreting the response (deserializing, checking for success etc.)
+	- uses an IWatingService for backoffs
+- IWaitingService
+	- a strategy for waiting between requests;
+	- the proposed one is an exponential backoff, but there are other numerous approaches (e.g. wait a fixed amount of seconds between each request).
+	- other strategies might be more optimal for our problem, but they can be easily swapped in if benchmarking shows they are better

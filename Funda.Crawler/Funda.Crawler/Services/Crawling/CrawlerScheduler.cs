@@ -44,22 +44,12 @@ namespace Funda.Crawler
             return taskList.Select(x => x.Result).SelectMany(x => x);
         }
 
-        private async Task<PageInformation> GetNumberOfPages(string urlTemplate)
-        {
-            var firstPage = await _requestService.GetPageResult(string.Format(urlTemplate, 1));
-            return firstPage.Paging;
-        }
-
-        private string BuildPageUrl(string urlTemplate, int pageNumber)
-        {
-            return string.Format(urlTemplate, pageNumber);
-        }
-
         private IEnumerable<IEnumerable<string>> DistributeUrls(int numberOfCrawlers, int totalPages, string urlTemplate)
         {
             var result = new List<List<string>>();
 
-            for (var i = 0; i < numberOfCrawlers; i++)
+            // If there are less pages than crawlers, no need to spawn additional ones
+            for (var i = 0; i < Math.Min(numberOfCrawlers, totalPages); i++)
             {
                 result.Add(new List<string>());
             }
@@ -67,12 +57,23 @@ namespace Funda.Crawler
             // Distribute the urls in a round robin fashion, to ensure it's as even as possible
             for (var i = 1; i <= totalPages; i++)
             {
-                var pageUrl = string.Format(urlTemplate, i);
+                var pageUrl = BuildPageUrl(urlTemplate, i);
                 var crawlerID = (i - 1) % numberOfCrawlers;
                 result[crawlerID].Add(pageUrl);
             }
 
             return result;
+        }
+
+        private async Task<PageInformation> GetNumberOfPages(string urlTemplate)
+        {
+            var firstPage = await _requestService.GetPageResult(BuildPageUrl(urlTemplate, 1));
+            return firstPage.Paging;
+        }
+
+        private string BuildPageUrl(string urlTemplate, int pageNumber)
+        {
+            return string.Format(urlTemplate, pageNumber);
         }
     }
 
