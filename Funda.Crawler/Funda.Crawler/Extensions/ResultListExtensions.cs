@@ -1,11 +1,10 @@
-﻿using System;
-using Funda.Crawler.Models;
+﻿using Funda.Crawler.Models;
 
 namespace Funda.Crawler.Extensions
 {
     public static class ResultListExtensions
     {
-        public static bool IsLastPage(this ResultList result)
+        public static bool IsLastPage(this ResultPage result)
         {
             if (result == null)
             {

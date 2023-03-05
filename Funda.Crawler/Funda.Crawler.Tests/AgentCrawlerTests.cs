@@ -1,5 +1,4 @@
-﻿using System;
-using Funda.Crawler.Models;
+﻿using Funda.Crawler.Models;
 using Moq;
 using Xunit;
 
@@ -12,7 +11,7 @@ namespace Funda.Crawler.Tests
         {
             var scheduler = new Mock<ICrawlerScheduler>();
             var formatter = new Mock<IResultFormatter>();
-            var timer = new Mock<TimedOperation>();
+            var timer = new Mock<ITimedOperation>();
 
             IEnumerable<Listing> mockListings = new List<Listing>()
             {
@@ -35,6 +34,8 @@ namespace Funda.Crawler.Tests
                     Id = "7"
                 }
             };
+
+            timer.ConfigureAsPassthrough();
 
             scheduler.Setup(x => x.GetListingsAsync("template {0}", 5)).Returns(Task.FromResult(mockListings));
 

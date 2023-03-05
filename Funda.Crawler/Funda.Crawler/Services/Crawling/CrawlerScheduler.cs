@@ -1,7 +1,5 @@
-﻿using System;
-using Funda.Crawler.Models;
+﻿using Funda.Crawler.Models;
 using Funda.Crawler.Services;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Funda.Crawler
 {
@@ -15,10 +13,10 @@ namespace Funda.Crawler
 
     public class CrawlerScheduler : ICrawlerScheduler
     {
-        private readonly IRequestService<ResultList> _requestService;
-        private readonly CrawlerFactory _crawlerFactory;
+        private readonly IRequestService<ResultPage> _requestService;
+        private readonly ICrawlerFactory _crawlerFactory;
 
-        public CrawlerScheduler(CrawlerFactory crawlerFactory, IRequestService<ResultList> requestService)
+        public CrawlerScheduler(ICrawlerFactory crawlerFactory, IRequestService<ResultPage> requestService)
         {
             _crawlerFactory = crawlerFactory;
             _requestService = requestService;
@@ -34,7 +32,7 @@ namespace Funda.Crawler
 
             foreach (var urlList in bucketedUrls)
             {
-                var crawler = _crawlerFactory.GetNewCraler();
+                var crawler = _crawlerFactory.GetNewCrawler();
                 taskList.Add(crawler.GetListingsSeriallyAsync(urlList));
             }
 
@@ -67,29 +65,13 @@ namespace Funda.Crawler
 
         private async Task<PageInformation> GetNumberOfPages(string urlTemplate)
         {
-            var firstPage = await _requestService.GetPageResult(BuildPageUrl(urlTemplate, 1));
+            var firstPage = await _requestService.GetPageResultAsync(BuildPageUrl(urlTemplate, 1));
             return firstPage.Paging;
         }
 
         private string BuildPageUrl(string urlTemplate, int pageNumber)
         {
             return string.Format(urlTemplate, pageNumber);
-        }
-    }
-
-    public class CrawlerFactory
-    {
-        private readonly IServiceProvider _serviceProvider;
-
-        public CrawlerFactory(IServiceProvider serviceProvider)
-        {
-            _serviceProvider = serviceProvider;
-        }
-
-        public ICrawler GetNewCraler()
-        {
-            var requestService = _serviceProvider.GetService<IRequestService<ResultList>>();
-            return new SerialCrawler(requestService);
         }
     }
 }

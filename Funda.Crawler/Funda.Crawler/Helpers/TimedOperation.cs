@@ -1,6 +1,5 @@
-﻿using System;
+﻿using Funda.Crawler.Services;
 using System.Diagnostics;
-using Funda.Crawler.Services;
 
 namespace Funda.Crawler
 {

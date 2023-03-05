@@ -1,5 +1,4 @@
-﻿using System;
-namespace Funda.Crawler.Models
+﻿namespace Funda.Crawler.Models
 {
     public class AgentListings
     {

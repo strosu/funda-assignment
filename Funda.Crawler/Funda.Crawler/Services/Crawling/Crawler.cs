@@ -1,9 +1,5 @@
-﻿using System;
-using System.Diagnostics;
-using Funda.Crawler.Extensions;
-using Funda.Crawler.Models;
+﻿using Funda.Crawler.Models;
 using Funda.Crawler.Services;
-using Newtonsoft.Json;
 
 namespace Funda.Crawler
 {
@@ -20,9 +16,9 @@ namespace Funda.Crawler
 
     public class SerialCrawler : ICrawler
     {
-        private readonly IRequestService<ResultList> _requestService;
+        private readonly IRequestService<ResultPage> _requestService;
 
-        public SerialCrawler(IRequestService<ResultList> requestService)
+        public SerialCrawler(IRequestService<ResultPage> requestService)
         {
             _requestService = requestService;
         }
@@ -33,7 +29,7 @@ namespace Funda.Crawler
 
             foreach (var url in pageUrls)
             {
-                var pageResults = await _requestService.GetPageResult(url);
+                var pageResults = await _requestService.GetPageResultAsync(url);
                 foreach (var listing in pageResults.Listings)
                 {
                     results.Add(listing);

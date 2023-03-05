@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 
 namespace Funda.Crawler.Models
 {
-    public class ResultList
+    public class ResultPage
     {
         [JsonProperty("Objects")]
         public List<Listing> Listings { get; set; }
@@ -15,29 +15,6 @@ namespace Funda.Crawler.Models
         public int TotalListings { get; set; }
 
         public PageInformation Paging { get; set; }
-    }
-
-    public class Listing : IEquatable<Listing>
-    {
-        public int GlobalId { get; set; }
-
-        public string Id { get; set; }
-
-        [JsonProperty("MakelaarId")]
-        public int SellerId { get; set; }
-
-        [JsonProperty("MakelaarNaam")]
-        public string SellerName { get; set; }
-
-        public bool Equals(Listing? other)
-        {
-            if (other == null)
-            {
-                return false;
-            }
-
-            return Id == other.Id;
-        }
     }
 
     public class PageInformation

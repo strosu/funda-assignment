@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using Funda.Crawler.Models;
+﻿using Funda.Crawler.Models;
 using Funda.Crawler.Services;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -36,7 +35,7 @@ class Program
         services.AddSingleton<HttpClient>();
 
         services.AddSingleton<ILogger, ConsoleLogger>();
-        services.AddTransient<IRequestService<ResultList>, RequestService<ResultList>>();
+        services.AddTransient<IRequestService<ResultPage>, RequestService<ResultPage>>();
         services.AddTransient<IWaitingService, ExponentialBackoffWaitingService>();
         services.AddSingleton<ITimedOperation, TimedOperation>();
         services.AddSingleton<ICrawler, SerialCrawler>();

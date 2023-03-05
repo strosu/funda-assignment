@@ -1,5 +1,4 @@
-﻿using System;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 
 namespace Funda.Crawler.Services
 {
@@ -18,7 +17,7 @@ namespace Funda.Crawler.Services
             _logger = logger;
         }
 
-        public async Task<T> GetPageResult(string pageUrl)
+        public async Task<T> GetPageResultAsync(string pageUrl)
         {
             _logger.Log($"Processing page {pageUrl}");
 
@@ -48,7 +47,7 @@ namespace Funda.Crawler.Services
 
     public interface IRequestService<T>
     {
-        Task<T> GetPageResult(string pageUrl);
+        Task<T> GetPageResultAsync(string pageUrl);
     }
 }
 

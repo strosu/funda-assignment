@@ -11,6 +11,7 @@ Contents
  * [Observations](#observations)
  * [General approach](#general-approach)
  * [Abstractions](#abstractions)
+ * [Next Steps](#next-steps)
 
 ### Problem
 ---
@@ -93,6 +94,7 @@ Using 5 as the degree of parallelism:
 
 
 ### Abstractions
+---
 
 These should be self evident from the code itself, but adding them here to speed up the process:
 
@@ -115,3 +117,19 @@ These should be self evident from the code itself, but adding them here to speed
 	- a strategy for waiting between requests;
 	- the proposed one is an exponential backoff, but there are other numerous approaches (e.g. wait a fixed amount of seconds between each request).
 	- other strategies might be more optimal for our problem, but they can be easily swapped in if benchmarking shows they are better
+
+
+### Next steps
+---
+
+Further improvement suggestions:
+- right now, each crawler has its own backoff when a request fails. An improvement would be to have a centralized value that would tell us if we're being throttled. This should be similar to a task (perhaps build from a TaskCompletionSource) that could be awaited before doing a request. 
+	- If we're not throttled at the moment, the task would simply return immediately, allowing the request to go through
+	- otherwise, the crawler that detects we are throttled would change this task untiul it can successfully get a request through
+- tests should obviously cover all components, much more rigurously than they do right now
+	
+API improvement suggestions:
+- If the specified page size is not supported, the API should either:
+	- return a 400 Bad Request, with a relevant message
+	- return the same number of max results as it does today, but it should return correct information related to the number of pages (e.g. if we have 1000 records and the pageSize argument sent is 100, it should tell the caller that the current page size is 25, and that there are 40 pages instead of 10). 
+- when throttling a user, it would be useful to also return the next time when a request would be successful. This would remove the need for guessing from the client side, and would reduce the load on the server.

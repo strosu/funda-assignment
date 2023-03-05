@@ -1,7 +1,4 @@
-﻿using System;
-using Funda.Crawler.Models;
-
-namespace Funda.Crawler
+﻿namespace Funda.Crawler
 {
     public class AgentFinder
     {
