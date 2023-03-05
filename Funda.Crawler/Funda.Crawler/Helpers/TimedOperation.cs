@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using Funda.Crawler.Services;
 
 namespace Funda.Crawler
 {
@@ -17,6 +18,13 @@ namespace Funda.Crawler
 
     public class TimedOperation : ITimedOperation
     {
+        private readonly ILogger _logger;
+
+        public TimedOperation(ILogger logger)
+        {
+            _logger = logger;
+        }
+
         public async Task<T> TimeOperationAsync<T>(Func<Task<T>> toExecute)
         {
             var watch = new Stopwatch();
@@ -24,7 +32,7 @@ namespace Funda.Crawler
 
             var result = await toExecute();
 
-            Console.WriteLine($"Total elapsed - {watch.Elapsed} milliseconds");
+            _logger.Log($"Total elapsed - {watch.Elapsed} milliseconds");
 
             return result;
         }

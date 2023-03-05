@@ -9,16 +9,18 @@ namespace Funda.Crawler.Services
 
         private readonly HttpClient _httpClient;
         private readonly IWaitingService _waitingService;
+        private readonly ILogger _logger;
 
-        public RequestService(HttpClient httpClient, IWaitingService waitingService)
+        public RequestService(HttpClient httpClient, IWaitingService waitingService, ILogger logger)
         {
             _httpClient = httpClient;
             _waitingService = waitingService;
+            _logger = logger;
         }
 
         public async Task<T> GetPageResult(string pageUrl)
         {
-            Console.WriteLine($"Processing page {pageUrl}");
+            _logger.Log($"Processing page {pageUrl}");
 
             _waitingService.Reset();
 
@@ -30,7 +32,7 @@ namespace Funda.Crawler.Services
                 {
                     var json = await result.Content.ReadAsStringAsync();
 
-                    Console.WriteLine($"Finished getting page {pageUrl}");
+                    _logger.Log($"Finished getting page {pageUrl}");
 
                     return JsonConvert.DeserializeObject<T>(json);
                 }
@@ -38,7 +40,9 @@ namespace Funda.Crawler.Services
                 await _waitingService.Wait();
             }
 
-            throw new TimeoutException("Could not get the request in time, giving up.");
+            var errorMessage = "Could not get the request in time, giving up.";
+            _logger.LogError(errorMessage);
+            throw new TimeoutException(errorMessage);
         }
     }
 

@@ -12,6 +12,9 @@ class Program
     private static readonly string FundaApiGardenTemplate =
         "http://partnerapi.funda.nl/feeds/Aanbod.svc/json/ac1b0b1572524640a0ecc54de453ea9f/?type=koop&zo=/amsterdam/tuin&page={0}&pagesize=25";
 
+    // THis would be configurable
+    private static readonly int DegreeOfParallelism = 5;
+
     static async Task Main(string[] args)
     {
         var services = new ServiceCollection();
@@ -21,9 +24,9 @@ class Program
 
         var agentFinder = serviceProvider.GetService<AgentFinder>();
 
-        await agentFinder.GetAndDisplayProlificAgentsAsync(FundaApiTemplate, 5);
+        await agentFinder.GetAndDisplayProlificAgentsAsync(FundaApiTemplate, DegreeOfParallelism);
 
-        await agentFinder.GetAndDisplayProlificAgentsAsync(FundaApiGardenTemplate, 5);
+        await agentFinder.GetAndDisplayProlificAgentsAsync(FundaApiGardenTemplate, DegreeOfParallelism);
 
         Console.ReadLine();
     }
@@ -31,6 +34,8 @@ class Program
     private static void ConfigureServices(IServiceCollection services)
     {
         services.AddSingleton<HttpClient>();
+
+        services.AddSingleton<ILogger, ConsoleLogger>();
         services.AddTransient<IRequestService<ResultList>, RequestService<ResultList>>();
         services.AddTransient<IWaitingService, ExponentialBackoffWaitingService>();
         services.AddSingleton<ITimedOperation, TimedOperation>();

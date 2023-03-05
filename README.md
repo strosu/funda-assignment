@@ -76,4 +76,19 @@ If the requests would be throttled after 100 with a 60s cooling period, most of 
 #### Approach 2: Sending the requests in parallel
 ---
 
+Using 5 as the degree of parallelism:
+
+*Rough execution tiem**: 
+- 5s when not getting throttled, significantly faster than the serial algorithm. Roughly 200ms per request, similar to the initial approach.
+- 75s when throttled: the patter is similar to the serial approach - we burst through our available quota faster, but still need to wait. As the number of pages is just slightly higher than the throttling limitl, the remainder are done faster, but it has a small impact on the overall time.
+
+**Pros**
+
+- faster in some scenarios
+
+**Cons**
+
+- needs an additional layer to distribute the work and aggredate the results
+
+
 

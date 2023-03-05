@@ -24,9 +24,12 @@ namespace Funda.Crawler.Services
         /// </summary>
         private int _millisecondsToWaitNext;
 
-        public ExponentialBackoffWaitingService()
+        private readonly ILogger _logger;
+
+        public ExponentialBackoffWaitingService(ILogger logger)
         {
-            JitterMilliseconds = new Random().Next(1000);
+            _logger = logger;
+            JitterMilliseconds = new Random().Next(100); // A request takes about 200ms on average, the halfway point seems like a decent pick for noise
             Reset();
         }
 
@@ -51,7 +54,7 @@ namespace Funda.Crawler.Services
             _retryCount++;
 
             var waitTime = _millisecondsToWaitNext + JitterMilliseconds;
-            Console.WriteLine($"Waiting for {waitTime} milliseconds");
+            _logger.Log($"Waiting for {waitTime} milliseconds");
 
             await Task.Delay(waitTime);
 
