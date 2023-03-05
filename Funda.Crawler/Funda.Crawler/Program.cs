@@ -11,7 +11,7 @@ class Program
     private static readonly string FundaApiGardenTemplate =
         "http://partnerapi.funda.nl/feeds/Aanbod.svc/json/ac1b0b1572524640a0ecc54de453ea9f/?type=koop&zo=/amsterdam/tuin&page={0}&pagesize=25";
 
-    // THis would be configurable
+    // This would be configurable
     private static readonly int DegreeOfParallelism = 5;
 
     static async Task Main(string[] args)
@@ -36,10 +36,10 @@ class Program
 
         services.AddSingleton<ILogger, ConsoleLogger>();
         services.AddTransient<IRequestService<ResultPage>, RequestService<ResultPage>>();
-        services.AddTransient<IWaitingService, ExponentialBackoffWaitingService>();
+        services.AddTransient<IRetryService, ExponentialBackoffRetryService>();
         services.AddSingleton<ITimedOperation, TimedOperation>();
         services.AddSingleton<ICrawler, SerialCrawler>();
-        services.AddSingleton<CrawlerFactory, CrawlerFactory>();
+        services.AddSingleton<ICrawlerFactory, CrawlerFactory>();
         services.AddSingleton<ICrawlerScheduler, CrawlerScheduler>();
         services.AddSingleton<IResultFormatter, TopTenFormatter>();
         services.AddSingleton<AgentFinder, AgentFinder>();

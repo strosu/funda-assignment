@@ -4,16 +4,14 @@ namespace Funda.Crawler.Services
 {
     public class RequestService<T> : IRequestService<T>
     {
-        private static readonly int MaxRetryCount = 10;
-
         private readonly HttpClient _httpClient;
-        private readonly IWaitingService _waitingService;
+        private readonly IRetryService _retryService;
         private readonly ILogger _logger;
 
-        public RequestService(HttpClient httpClient, IWaitingService waitingService, ILogger logger)
+        public RequestService(HttpClient httpClient, IRetryService retryService, ILogger logger)
         {
             _httpClient = httpClient;
-            _waitingService = waitingService;
+            _retryService = retryService;
             _logger = logger;
         }
 
@@ -21,22 +19,30 @@ namespace Funda.Crawler.Services
         {
             _logger.Log($"Processing page {pageUrl}");
 
-            _waitingService.Reset();
+            _retryService.Reset();
 
-            while (_waitingService.CanRetryFurther())
+            while (_retryService.CanRetryFurther())
             {
-                var result = await _httpClient.GetAsync(pageUrl);
-
-                if (result != null && result.IsSuccessStatusCode)
+                try
                 {
-                    var json = await result.Content.ReadAsStringAsync();
+                    var result = await _httpClient.GetAsync(pageUrl);
 
-                    _logger.Log($"Finished getting page {pageUrl}");
+                    if (result != null && result.IsSuccessStatusCode)
+                    {
+                        var json = await result.Content.ReadAsStringAsync();
 
-                    return JsonConvert.DeserializeObject<T>(json);
+                        _logger.Log($"Finished getting page {pageUrl}");
+
+                        return JsonConvert.DeserializeObject<T>(json);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // This is meant to catch unhandled exceptions, e.g. server throwing a 500 for whatever reason; In that case, don't just give up
+                    _logger.LogError(ex.Message);
                 }
 
-                await _waitingService.Wait();
+                await _retryService.Wait();
             }
 
             var errorMessage = "Could not get the request in time, giving up.";

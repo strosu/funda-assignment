@@ -1,12 +1,11 @@
-﻿using System;
-namespace Funda.Crawler.Services
+﻿namespace Funda.Crawler.Services
 {
     /// <summary>
     /// Service used as a strategy for waiting between failed requests
     /// Implements an exponential backoff; this works well when there's an outage, might not be the best for when throttled
     /// As the sliding window is 60s and we exhaust it pretty early in the execution, we need to get to the 32-64s interval, at which point the waiting times between requests are rather large
     /// </summary>
-    public class ExponentialBackoffWaitingService : IWaitingService
+    public class ExponentialBackoffRetryService : IRetryService
     {
         private static readonly int BackoffFactor = 2;
 
@@ -26,7 +25,7 @@ namespace Funda.Crawler.Services
 
         private readonly ILogger _logger;
 
-        public ExponentialBackoffWaitingService(ILogger logger)
+        public ExponentialBackoffRetryService(ILogger logger)
         {
             _logger = logger;
             JitterMilliseconds = new Random().Next(100); // A request takes about 200ms on average, the halfway point seems like a decent pick for noise
@@ -62,7 +61,7 @@ namespace Funda.Crawler.Services
         }
     }
 
-    public interface IWaitingService
+    public interface IRetryService
     {
         Task Wait();
 
