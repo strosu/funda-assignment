@@ -20,7 +20,10 @@ class Program
         var serviceProvider = services.BuildServiceProvider();
 
         var agentFinder = serviceProvider.GetService<AgentFinder>();
-        await agentFinder.GetAndDisplayProlificAgentsAsync(FundaApiTemplate);
+
+        await agentFinder.GetAndDisplayProlificAgentsAsync(FundaApiTemplate, 5);
+
+        await agentFinder.GetAndDisplayProlificAgentsAsync(FundaApiGardenTemplate, 5);
 
         Console.ReadLine();
     }
@@ -31,7 +34,9 @@ class Program
         services.AddTransient<IRequestService<ResultList>, RequestService<ResultList>>();
         services.AddTransient<IWaitingService, ExponentialBackoffWaitingService>();
         services.AddSingleton<ITimedOperation, TimedOperation>();
-        services.AddSingleton<ICrawler, Crawler>();
+        services.AddSingleton<ICrawler, SerialCrawler>();
+        services.AddSingleton<CrawlerFactory, CrawlerFactory>();
+        services.AddSingleton<ICrawlerScheduler, CrawlerScheduler>();
         services.AddSingleton<IResultFormatter, TopTenFormatter>();
         services.AddSingleton<AgentFinder, AgentFinder>();
     }

@@ -46,7 +46,7 @@ namespace Funda.Crawler.Models
         /// Total number of pages
         /// </summary>
         [JsonProperty("AantalPaginas")]
-        public int TotalpageNumber { get; set; }
+        public int TotalPageNumber { get; set; }
 
         /// <summary>
         /// Current page number

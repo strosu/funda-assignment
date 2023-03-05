@@ -10,13 +10,21 @@ namespace Funda.Crawler
     public interface ICrawler
     {
         Task<IEnumerable<Listing>> GetListingsAsync(string urlTemplate);
+
+        /// <summary>
+        /// Takes a list of pages to retrieve and gets the results for all of them
+        /// In a more complex system, this would be a separate service with its own queue. The producer end would pipe urls into it, and this service (the consumer) would send the queries
+        /// </summary>
+        /// <param name="pageUrls"></param>
+        /// <returns></returns>
+        Task<IEnumerable<Listing>> GetListingsSeriallyAsync(IEnumerable<string> pageUrls);
     }
 
-    public class Crawler : ICrawler
+    public class SerialCrawler : ICrawler
     {
         private readonly IRequestService<ResultList> _requestService;
 
-        public Crawler(IRequestService<ResultList> requestService)
+        public SerialCrawler(IRequestService<ResultList> requestService)
         {
             _requestService = requestService;
         }
@@ -39,7 +47,7 @@ namespace Funda.Crawler
             }
 
             var taskList = new List<Task<ResultList>>();
-            for (var i = 2; i < pageInfo.TotalpageNumber; i++)
+            for (var i = 2; i < pageInfo.TotalPageNumber; i++)
             {
                 taskList.Add(GetPageResults(urlTemplate, i));
             }
@@ -70,6 +78,18 @@ namespace Funda.Crawler
         private async Task<ResultList> GetPageResults(string urlTemplate, int pageIndex)
         {
             return await _requestService.GetPageResult(string.Format(urlTemplate, pageIndex));
+        }
+
+        public async Task<IEnumerable<Listing>> GetListingsSeriallyAsync(IEnumerable<string> pageUrls)
+        {
+            var results = new List<ResultList>();
+
+            foreach (var url in pageUrls)
+            {
+                results.Add(await _requestService.GetPageResult(url));
+            }
+
+            return GetUniqueListings(results);
         }
     }
 }
